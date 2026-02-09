@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Be My Valentine? 💕</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 50%, #ffecd2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #c93756;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .instructions {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        .puzzle-container {
+            display: inline-block;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 100%;
+        }
+
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 150px);
+            grid-template-rows: repeat(3, 150px);
+            gap: 5px;
+            background: #ddd;
+            padding: 5px;
+            border-radius: 10px;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .instructions {
+                font-size: 0.95em;
+                padding: 12px 20px;
+            }
+            
+            .puzzle-grid {
+                grid-template-columns: repeat(3, 100px);
+                grid-template-rows: repeat(3, 100px);
+            }
+            
+            .puzzle-tile {
+                background-size: 300px 300px !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+                margin-bottom: 15px;
+            }
+            
+            .instructions {
+                font-size: 0.9em;
+                padding: 10px 15px;
+                margin-bottom: 20px;
+            }
+            
+            .puzzle-container {
+                padding: 15px;
+            }
+            
+            .puzzle-grid {
+                grid-template-columns: repeat(3, 90px);
+                grid-template-rows: repeat(3, 90px);
+                gap: 3px;
+                padding: 3px;
+            }
+            
+            .puzzle-tile {
+                background-size: 270px 270px !important;
+            }
+            
+            .moves-counter {
+                font-size: 1em;
+                margin-top: 15px;
+            }
+            
+            .shuffle-btn {
+                padding: 8px 25px;
+                font-size: 0.9em;
+                margin-top: 12px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .puzzle-grid {
+                grid-template-columns: repeat(3, 80px);
+                grid-template-rows: repeat(3, 80px);
+            }
+            
+            .puzzle-tile {
+                background-size: 240px 240px !important;
+            }
+        }
+
+        .puzzle-tile {
+            background-size: 450px 450px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .puzzle-tile:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .puzzle-tile.empty {
+            background: #fff;
+            cursor: default;
+        }
+
+        .puzzle-tile.empty:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .reveal-message {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .reveal-message.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .message-content {
+            text-align: center;
+            color: white;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .message-content h2 {
+            font-size: 4em;
+            color: #ff6b9d;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .message-content p {
+            font-size: 2em;
+            margin-bottom: 30px;
+        }
+
+        .hearts {
+            font-size: 3em;
+            animation: pulse 1s ease infinite;
+        }
+        
+        /* Mobile reveal message */
+        @media (max-width: 768px) {
+            .message-content h2 {
+                font-size: 2.5em;
+                padding: 0 20px;
+            }
+            
+            .message-content p {
+                font-size: 1.3em;
+                padding: 0 20px;
+            }
+            
+            .hearts {
+                font-size: 2em;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .message-content h2 {
+                font-size: 2em;
+            }
+            
+            .message-content p {
+                font-size: 1.1em;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .moves-counter {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .shuffle-btn {
+            margin-top: 15px;
+            padding: 10px 30px;
+            font-size: 1em;
+            background: #ff6b9d;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .shuffle-btn:hover {
+            background: #ff4d7d;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💕 A Special Puzzle For You 💕</h1>
+        <div class="instructions">
+            Solve the puzzle to reveal a special question! Click tiles to move them into the empty space.
+        </div>
+        
+        <div class="puzzle-container">
+            <div class="puzzle-grid" id="puzzleGrid"></div>
+            <div class="moves-counter">Moves: <span id="moveCount">0</span></div>
+            <button class="shuffle-btn" onclick="shufflePuzzle()">Shuffle Again</button>
+        </div>
+    </div>
+
+    <div class="reveal-message" id="revealMessage">
+        <div class="message-content">
+            <h2>Will You Be My Valentine?</h2>
+            <p>I love you more than words can say! ❤️</p>
+            <div class="hearts">💕 💖 💕 💖 💕</div>
+        </div>
+    </div>
+
+    <script>
+        let tiles = [];
+        let emptyIndex = 8;
+        let moves = 0;
+        const gridSize = 3;
+
+        // You can replace this URL with a photo of you and your wife!
+        const imageUrl = 'https://images.unsplash.com/photo-1518568814500-bf0f8d125f46?w=450&h=450&fit=crop';
+
+        function initPuzzle() {
+            const grid = document.getElementById('puzzleGrid');
+            grid.innerHTML = '';
+            tiles = [];
+            
+            // Get tile size based on screen width
+            const tileSize = getTileSize();
+            
+            // Create tiles in correct order
+            for (let i = 0; i < 9; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'puzzle-tile';
+                tile.dataset.index = i;
+                
+                if (i === 8) {
+                    tile.classList.add('empty');
+                } else {
+                    const row = Math.floor(i / 3);
+                    const col = i % 3;
+                    tile.style.backgroundImage = `url(${imageUrl})`;
+                    tile.style.backgroundPosition = `-${col * tileSize}px -${row * tileSize}px`;
+                }
+                
+                tile.addEventListener('click', () => moveTile(i));
+                grid.appendChild(tile);
+                tiles.push(tile);
+            }
+            
+            shufflePuzzle();
+        }
+        
+        function getTileSize() {
+            // Return tile size based on screen width
+            if (window.innerWidth <= 360) return 80;
+            if (window.innerWidth <= 480) return 90;
+            if (window.innerWidth <= 768) return 100;
+            return 150;
+        }
+
+        function moveTile(index) {
+            if (!canMove(index)) return;
+            
+            // Swap tiles
+            const emptyTile = tiles[emptyIndex];
+            const clickedTile = tiles[index];
+            
+            // Swap in DOM
+            const parent = clickedTile.parentNode;
+            const emptyNext = emptyTile.nextSibling;
+            const clickedNext = clickedTile.nextSibling;
+            
+            if (emptyNext === clickedTile) {
+                parent.insertBefore(clickedTile, emptyTile);
+            } else if (clickedNext === emptyTile) {
+                parent.insertBefore(emptyTile, clickedTile);
+            } else {
+                parent.insertBefore(clickedTile, emptyNext);
+                parent.insertBefore(emptyTile, clickedNext);
+            }
+            
+            // Swap in array
+            [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+            emptyIndex = index;
+            
+            moves++;
+            document.getElementById('moveCount').textContent = moves;
+            
+            checkWin();
+        }
+
+        function canMove(index) {
+            const row = Math.floor(index / gridSize);
+            const col = index % gridSize;
+            const emptyRow = Math.floor(emptyIndex / gridSize);
+            const emptyCol = emptyIndex % gridSize;
+            
+            return (Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
+                   (Math.abs(col - emptyCol) === 1 && row === emptyRow);
+        }
+
+        function checkWin() {
+            for (let i = 0; i < 9; i++) {
+                if (parseInt(tiles[i].dataset.index) !== i) {
+                    return false;
+                }
+            }
+            
+            // Puzzle solved!
+            setTimeout(() => {
+                document.getElementById('revealMessage').classList.add('show');
+            }, 500);
+        }
+
+        function shufflePuzzle() {
+            moves = 0;
+            document.getElementById('moveCount').textContent = moves;
+            document.getElementById('revealMessage').classList.remove('show');
+            
+            // Shuffle with valid moves
+            for (let i = 0; i < 100; i++) {
+                const validMoves = [];
+                for (let j = 0; j < 9; j++) {
+                    if (canMove(j) && !tiles[j].classList.contains('empty')) {
+                        validMoves.push(j);
+                    }
+                }
+                const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+                
+                // Swap without counting moves
+                [tiles[randomMove], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[randomMove]];
+                emptyIndex = randomMove;
+            }
+            
+            // Re-render grid
+            const grid = document.getElementById('puzzleGrid');
+            grid.innerHTML = '';
+            tiles.forEach(tile => grid.appendChild(tile));
+        }
+
+        // Initialize the puzzle when page loads
+        initPuzzle();
+        
+        // Reinitialize on window resize (for orientation changes)
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                initPuzzle();
+            }, 250);
+        });
+    </script>
+</body>
+</html>

@@ -300,7 +300,7 @@
         let moves = 0;
         const gridSize = 3;
 
-        // You can replace this URL with a photo of you and your wife!
+        // Your image file
         const imageUrl = 'IMG_20251231_084444_848.jpg';
 
         function initPuzzle() {
@@ -362,4 +362,103 @@
                 const row = Math.floor(tileIndex / 3);
                 const col = tileIndex % 3;
                 tiles[emptyIndex].style.backgroundImage = `url(${imageUrl})`;
-                tiles[
+                tiles[emptyIndex].style.backgroundPosition = `-${col * tileSize}px -${row * tileSize}px`;
+            }
+            
+            // Clear background for the new empty tile
+            tiles[index].style.backgroundImage = '';
+            
+            // Update empty index
+            emptyIndex = index;
+            
+            moves++;
+            document.getElementById('moveCount').textContent = moves;
+            
+            checkWin();
+        }
+
+        function canMove(index) {
+            const row = Math.floor(index / gridSize);
+            const col = index % gridSize;
+            const emptyRow = Math.floor(emptyIndex / gridSize);
+            const emptyCol = emptyIndex % gridSize;
+            
+            return (Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
+                   (Math.abs(col - emptyCol) === 1 && row === emptyRow);
+        }
+
+        function checkWin() {
+            for (let i = 0; i < 9; i++) {
+                if (parseInt(tiles[i].dataset.index) !== i) {
+                    return false;
+                }
+            }
+            
+            // Puzzle solved!
+            setTimeout(() => {
+                document.getElementById('revealMessage').classList.add('show');
+            }, 500);
+        }
+
+        function shufflePuzzle() {
+            moves = 0;
+            document.getElementById('moveCount').textContent = moves;
+            document.getElementById('revealMessage').classList.remove('show');
+            
+            // Perform random valid moves to shuffle
+            const moveCount = 100;
+            for (let i = 0; i < moveCount; i++) {
+                const validMoves = [];
+                
+                // Find all tiles adjacent to empty space
+                for (let j = 0; j < 9; j++) {
+                    if (canMove(j) && !tiles[j].classList.contains('empty')) {
+                        validMoves.push(j);
+                    }
+                }
+                
+                // Pick a random valid move
+                if (validMoves.length > 0) {
+                    const randomIndex = validMoves[Math.floor(Math.random() * validMoves.length)];
+                    
+                    // Perform the swap
+                    const tempIndex = tiles[randomIndex].dataset.index;
+                    tiles[randomIndex].dataset.index = tiles[emptyIndex].dataset.index;
+                    tiles[emptyIndex].dataset.index = tempIndex;
+                    
+                    // Swap classes and backgrounds
+                    tiles[emptyIndex].classList.remove('empty');
+                    tiles[randomIndex].classList.add('empty');
+                    
+                    const tileSize = getTileSize();
+                    const tileDataIndex = parseInt(tempIndex);
+                    const row = Math.floor(tileDataIndex / 3);
+                    const col = tileDataIndex % 3;
+                    tiles[emptyIndex].style.backgroundImage = `url(${imageUrl})`;
+                    tiles[emptyIndex].style.backgroundPosition = `-${col * tileSize}px -${row * tileSize}px`;
+                    
+                    tiles[randomIndex].style.backgroundImage = '';
+                    
+                    emptyIndex = randomIndex;
+                }
+            }
+            
+            // Reset move counter after shuffling
+            moves = 0;
+            document.getElementById('moveCount').textContent = moves;
+        }
+
+        // Initialize the puzzle when page loads
+        initPuzzle();
+        
+        // Reinitialize on window resize (for orientation changes)
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                initPuzzle();
+            }, 250);
+        });
+    </script>
+</body>
+</html>

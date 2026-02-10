@@ -301,7 +301,7 @@
         const gridSize = 3;
 
         // You can replace this URL with a photo of you and your wife!
-        const imageUrl = 'IMG_20251231_084444_848.jpg';
+        const imageUrl = 'https://images.unsplash.com/photo-1518568814500-bf0f8d125f46?w=450&h=450&fit=crop';
 
         function initPuzzle() {
             const grid = document.getElementById('puzzleGrid');
@@ -345,94 +345,21 @@
         function moveTile(index) {
             if (!canMove(index)) return;
             
-            // Swap tiles
-            const emptyTile = tiles[emptyIndex];
-            const clickedTile = tiles[index];
+            // Swap the data-index values (which represent the tile's identity)
+            const tempIndex = tiles[index].dataset.index;
+            tiles[index].dataset.index = tiles[emptyIndex].dataset.index;
+            tiles[emptyIndex].dataset.index = tempIndex;
             
-            // Swap in DOM
-            const parent = clickedTile.parentNode;
-            const emptyNext = emptyTile.nextSibling;
-            const clickedNext = clickedTile.nextSibling;
+            // Swap classes and backgrounds
+            const wasEmpty = tiles[emptyIndex].classList.contains('empty');
+            tiles[emptyIndex].classList.remove('empty');
+            tiles[index].classList.add('empty');
             
-            if (emptyNext === clickedTile) {
-                parent.insertBefore(clickedTile, emptyTile);
-            } else if (clickedNext === emptyTile) {
-                parent.insertBefore(emptyTile, clickedTile);
-            } else {
-                parent.insertBefore(clickedTile, emptyNext);
-                parent.insertBefore(emptyTile, clickedNext);
-            }
-            
-            // Swap in array
-            [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
-            emptyIndex = index;
-            
-            moves++;
-            document.getElementById('moveCount').textContent = moves;
-            
-            checkWin();
-        }
-
-        function canMove(index) {
-            const row = Math.floor(index / gridSize);
-            const col = index % gridSize;
-            const emptyRow = Math.floor(emptyIndex / gridSize);
-            const emptyCol = emptyIndex % gridSize;
-            
-            return (Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
-                   (Math.abs(col - emptyCol) === 1 && row === emptyRow);
-        }
-
-        function checkWin() {
-            for (let i = 0; i < 9; i++) {
-                if (parseInt(tiles[i].dataset.index) !== i) {
-                    return false;
-                }
-            }
-            
-            // Puzzle solved!
-            setTimeout(() => {
-                document.getElementById('revealMessage').classList.add('show');
-            }, 500);
-        }
-
-        function shufflePuzzle() {
-            moves = 0;
-            document.getElementById('moveCount').textContent = moves;
-            document.getElementById('revealMessage').classList.remove('show');
-            
-            // Shuffle with valid moves
-            for (let i = 0; i < 100; i++) {
-                const validMoves = [];
-                for (let j = 0; j < 9; j++) {
-                    if (canMove(j) && !tiles[j].classList.contains('empty')) {
-                        validMoves.push(j);
-                    }
-                }
-                const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
-                
-                // Swap without counting moves
-                [tiles[randomMove], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[randomMove]];
-                emptyIndex = randomMove;
-            }
-            
-            // Re-render grid
-            const grid = document.getElementById('puzzleGrid');
-            grid.innerHTML = '';
-            tiles.forEach(tile => grid.appendChild(tile));
-        }
-
-        // Initialize the puzzle when page loads
-        initPuzzle();
-        
-        // Reinitialize on window resize (for orientation changes)
-        let resizeTimer;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                initPuzzle();
-            }, 250);
-        });
-    </script>
-</body>
-</html>
+            // Update background for the tile that's no longer empty
+            if (wasEmpty) {
+                const tileSize = getTileSize();
+                const tileIndex = parseInt(tempIndex);
+                const row = Math.floor(tileIndex / 3);
+                const col = tileIndex % 3;
+                tiles[emptyIndex].style.backgroundImage = `url(${imageUrl})`;
+                tiles[
